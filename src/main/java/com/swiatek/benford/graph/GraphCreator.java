@@ -1,24 +1,16 @@
 package com.swiatek.benford.graph;
 
-import com.opencsv.CSVParser;
-import com.opencsv.CSVParserBuilder;
-import com.opencsv.CSVReader;
-import com.opencsv.CSVReaderBuilder;
-import com.opencsv.exceptions.CsvException;
 import com.swiatek.benford.commons.BenfordLawValidator;
 import com.swiatek.benford.commons.ParsingConstants;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,35 +19,28 @@ import java.util.stream.Collectors;
 class GraphCreator {
     BenfordLawValidator benfordLawValidator;
 
-    Optional<Graph> parseDocumentContentToGraph(byte[] documentContent, Long documentId) {
-        try (final BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(documentContent)))) {
-            var parser = new CSVParserBuilder()
-                    .withSeparator(ParsingConstants.SEPARATOR)
-                    .withIgnoreQuotations(true)
-                    .build();
-            var csvReader = new CSVReaderBuilder(reader)
-                    .withCSVParser(parser)
-                    .build();
-            Integer searchedColumnIndex = getSearchedColumnIndex(csvReader.readNext());
-            if (searchedColumnIndex >= 0) {
-                return buildGraph(documentId, csvReader.readAll(), searchedColumnIndex);
-            }
-        } catch (IOException | CsvException e) {
-            log.debug("File incorrect", e);
-        }
-
-        return Optional.empty();
+    Mono<Graph> parseDocumentContentToGraph(List<String> documentContent, UUID documentId) {
+        return Mono.just(getSearchedColumnIndex(documentContent.get(0).split(ParsingConstants.SEPARATOR.toString())))
+                .filter(searchedColumnIndex -> searchedColumnIndex >= 0)
+                .flatMap(searchedIndex -> buildGraph(documentId, documentContent, searchedIndex));
     }
 
-    private Optional<Graph> buildGraph(Long documentId, List<String[]> documentContent, Integer searchedColumnIndex) {
-        var firstDigits = extractSearchedColumnFirstDigits(documentContent, searchedColumnIndex);
-        var digitsWithCount = getDigitsWithCountMap(firstDigits);
-        boolean matchesBenfordLaw = benfordLawValidator.doesDataMatchBenfordLaw(digitsWithCount);
-        return Optional.of(new Graph(documentId, matchesBenfordLaw, digitsWithCount));
+    public Mono<Graph> createBenfordGraph(Long sampleSize) {
+        return Mono.just(new Graph(null, true, benfordLawValidator.getIdealDigitsMapForSampleSize(sampleSize)));
     }
 
-    private List<Integer> extractSearchedColumnFirstDigits(List<String[]> rows, Integer searchedColumnIndex) {
+    private Mono<Graph> buildGraph(UUID documentId, List<String> documentContent, Integer searchedColumnIndex) {
+        return Mono.just(extractSearchedColumnFirstDigits(documentContent, searchedColumnIndex))
+                .map(this::getDigitsWithCountMap)
+                .map(digitsWithCount -> new Graph(documentId,
+                        benfordLawValidator.doesDataMatchBenfordLaw(digitsWithCount),
+                        digitsWithCount));
+    }
+
+    private List<Integer> extractSearchedColumnFirstDigits(List<String> rows, Integer searchedColumnIndex) {
         return rows.stream()
+                .filter(row -> !row.contains(ParsingConstants.COLUMN_NAME))
+                .map(row -> row.split(ParsingConstants.SEPARATOR.toString()))
                 .filter(row -> row.length > searchedColumnIndex)
                 .map(row -> row[searchedColumnIndex])
                 .map(this::getFirstNonZeroDigit)
@@ -93,5 +78,4 @@ class GraphCreator {
         }
         return firstNonZeroDigit;
     }
-
 }

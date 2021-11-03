@@ -2,11 +2,12 @@ package com.swiatek.benford.graph;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
 
-import javax.persistence.*;
+import java.util.UUID;
 
-@Entity
-@Table(name = "graph")
+@Table("graph")
 @Getter
 @Setter
 @ToString
@@ -15,12 +16,9 @@ import javax.persistence.*;
 @NoArgsConstructor
 class GraphEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", nullable = false)
     Long id;
 
-    // @OneToOne(targetEntity = UploadedDocumentEntity.class)
-    Long documentId;
+    UUID documentUuid;
 
     Boolean matchesBenfordLaw;
 
@@ -42,12 +40,10 @@ class GraphEntity {
 
     Long ninesCount;
 
-    Long errorsCount;
-
-    public GraphEntity(final Long documentId, final Boolean matchesBenfordLaw, final Long onesCount, final Long twosCount,
+    public GraphEntity(final UUID documentUuid, final Boolean matchesBenfordLaw, final Long onesCount, final Long twosCount,
                        final Long threesCount, final Long foursCount, final Long fivesCount, final Long sixesCount,
-                       final Long sevensCount, final Long eightsCount, final Long ninesCount, final Long errorsCount) {
-        this.documentId = documentId;
+                       final Long sevensCount, final Long eightsCount, final Long ninesCount) {
+        this.documentUuid = documentUuid;
         this.matchesBenfordLaw = matchesBenfordLaw;
         this.onesCount = onesCount;
         this.twosCount = twosCount;
@@ -58,18 +54,17 @@ class GraphEntity {
         this.sevensCount = sevensCount;
         this.eightsCount = eightsCount;
         this.ninesCount = ninesCount;
-        this.errorsCount = errorsCount;
     }
 
     public static GraphEntity from(Graph graph) {
-        return new GraphEntity(graph.getDocumentId(), graph.getMatchesBenfordLaw(), graph.getOnesCount(), graph.getTwosCount(),
+        return new GraphEntity(graph.getDocumentUuid(), graph.getMatchesBenfordLaw(), graph.getOnesCount(), graph.getTwosCount(),
                 graph.getThreesCount(), graph.getFoursCount(), graph.getFivesCount(), graph.getSixesCount(),
-                graph.getSevensCount(), graph.getEightsCount(), graph.getNinesCount(), graph.getErrorsCount());
+                graph.getSevensCount(), graph.getEightsCount(), graph.getNinesCount());
 
     }
 
     public Graph to() {
-        return new Graph(documentId, matchesBenfordLaw, onesCount, twosCount, threesCount, foursCount,
-                fivesCount, sixesCount, sevensCount, eightsCount, ninesCount, errorsCount);
+        return new Graph(documentUuid, matchesBenfordLaw, onesCount, twosCount, threesCount, foursCount,
+                fivesCount, sixesCount, sevensCount, eightsCount, ninesCount);
     }
 }

@@ -3,12 +3,14 @@ package com.swiatek.benford.integration
 import com.swiatek.benford.IntegrationSpec
 import com.swiatek.benford.document.DocumentData
 import com.swiatek.benford.document.DocumentFacade
+import com.swiatek.benford.document.FilePartTest
 import com.swiatek.benford.document.UploadedDocument
 import com.swiatek.benford.document.result.UploadResult
 import com.swiatek.benford.document.result.ValidationResult
 import com.swiatek.benford.graph.Graph
 import com.swiatek.benford.graph.GraphFacade
 import org.springframework.beans.factory.annotation.Autowired
+import reactor.core.publisher.Mono
 
 class DocumentIntegrationSpec extends IntegrationSpec implements DocumentData {
 
@@ -21,34 +23,35 @@ class DocumentIntegrationSpec extends IntegrationSpec implements DocumentData {
 
     def "Should add document to database and create graph"() {
         given:
-        def input = correctInput.getBytes()
+        def input = new FilePartTest(correctInput)
         def title = UUID.randomUUID().toString()
-        Long generatedId = -1
+        def uuid = UUID.randomUUID()
         when:
-        UploadResult uploadResult = documentFacade.uploadDocument(input, title)
+        UploadResult uploadResult = documentFacade.uploadDocument(Mono.just(input), title, uuid).block()
         then:
-//        conditions.eventually {
-        Optional<UploadedDocument> optionalDocument = documentFacade.getUploadedData(uploadResult.id())
-        UploadedDocument document = optionalDocument.get()
-        document != null
-//            generatedId = document.getId()
-        document.getContent() == input
-        document.getTitle() == title
-//        }
+        UploadedDocument document
+        conditions.eventually{
+            document = documentFacade.getUploadedData(uploadResult.uuid()).block()
+            document != null
+            document.getTitle() == title
+        }
         and:
-        Optional<Graph> optionalGraph = graphFacade.getGraphForDocumentId(document.getId())
+        Mono<Graph> graphMono = graphFacade.getGraphForDocumentId(document.getUuid())
         then:
-        optionalGraph.isPresent()
+        def graph = graphMono.block()
         def map = [2: 1L, 4: 1L]
         //for that small sample, Benford Law is irrelevant
-        optionalGraph.get() == new Graph(document.getId(), true, map)
+        graph == new Graph(document.getUuid(), true, map)
     }
 
     def "Should not add document to database and emmit event"() {
+        given:
+        var uuid = UUID.randomUUID()
         when:
-        UploadResult uploadResult = documentFacade.uploadDocument(incorrectInput.getBytes(), "Test")
+        def uploadResult = documentFacade.uploadDocument(Mono.just(new FilePartTest(incorrectInput)), "Test", uuid).block()
         then:
-        ValidationResult.INCORRECT_DATA_FORMAT == uploadResult.validationResult()
+        uploadResult.validationResult() == ValidationResult.INCORRECT_DATA_FORMAT
+        !documentFacade.getUploadedData(uuid).block()
     }
 
 }

@@ -4,11 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Value;
 
 import java.util.Map;
+import java.util.UUID;
 
 @Value
 @AllArgsConstructor
 public class Graph {
-    Long documentId;
+    UUID documentUuid;
     Boolean matchesBenfordLaw;
 
     Long onesCount;
@@ -21,10 +22,12 @@ public class Graph {
     Long eightsCount;
     Long ninesCount;
 
-    Long errorsCount;
+    Long getTotalCount() {
+        return onesCount+twosCount+threesCount+foursCount+fivesCount+sixesCount+sevensCount+eightsCount+ninesCount;
+    }
 
-    public Graph(final Long documentId, boolean matchesBenfordLaw, Map<Integer, Long> digitsWithCount) {
-        this.documentId = documentId;
+    public Graph(UUID documentUuid, boolean matchesBenfordLaw, Map<Integer, Long> digitsWithCount) {
+        this.documentUuid = documentUuid;
         this.matchesBenfordLaw = matchesBenfordLaw;
         this.onesCount = digitsWithCount.get(1);
         this.twosCount = digitsWithCount.get(2);
@@ -35,6 +38,5 @@ public class Graph {
         this.sevensCount = digitsWithCount.get(7);
         this.eightsCount = digitsWithCount.get(8);
         this.ninesCount = digitsWithCount.get(9);
-        this.errorsCount = digitsWithCount.get(null);
     }
 }

@@ -9,21 +9,33 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - db
+      - pg
+      - mongo
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/compose-postgres
-      - SPRING_DATASOURCE_USERNAME=compose-postgres
-      - SPRING_DATASOURCE_PASSWORD=compose-postgres
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_R2DBC_URL=r2dbc:postgresql://pg:5432/compose-postgres
+      - SPRING_R2DBC_USERNAME=compose-postgres
+      - SPRING_R2DBC_PASSWORD=compose-postgres
+#      - SPRING_DATA_MONGODB_URI=mongodb://mg:27017/compose-mongo
+#      - SPRING_DATA_USERNAME=compose-mongo
+#      - SPRING_DATA_PASSWORD=compose-mongo
 
 
-  db:
+  pg:
     image: 'postgres:14.0'
-    container_name: db
+    container_name: postgres
     ports:
       - "5432:5432"
     environment:
       - POSTGRES_USER=compose-postgres
       - POSTGRES_PASSWORD=compose-postgres
-#    volumes:
-#      - ./schema.sql:/docker-entrypoint-initdb.d/init.sql
+    volumes:
+      - ./schema.sql:/docker-entrypoint-initdb.d/init.sql
+
+#  mg:
+#    image: 'mongo:5.0.3'
+#    container_name: mongo
+#    ports:
+#      - "27017:27017"
+#    environment:
+#      - MONGO_INITDB_ROOT_USERNAME=compose-mongo
+#      - MONGO_INITDB_ROOT_PASSWORD=compose-mongo

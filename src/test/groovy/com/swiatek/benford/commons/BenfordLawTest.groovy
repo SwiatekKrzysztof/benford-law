@@ -6,7 +6,7 @@ import java.util.stream.Collectors
 
 class BenfordLawTest extends Specification {
 
-    BenfordLawValidator benfordLawValidator
+    BenfordLawValidator benfordLawValidator = new BenfordLawValidator()
 
     def "Benford law test"() {
         when: "Large enough dataset known to match Benford Law, such as powers of 2"
@@ -17,6 +17,10 @@ class BenfordLawTest extends Specification {
         Map<Integer, Long> squares = squaresOfNaturalNumbers(10000)
         then:
         !benfordLawValidator.doesDataMatchBenfordLaw(squares)
+        when: "Self test"
+        Map<Integer, Long> ideal = benfordLawValidator.getIdealDigitsMapForSampleSize(10000)
+        then:
+        benfordLawValidator.doesDataMatchBenfordLaw(ideal)
     }
 
 

@@ -1,4 +1,6 @@
 package com.swiatek.benford.document.result;
 
-public record UploadResult(Long id, ValidationResult validationResult) {
+import java.util.UUID;
+
+public record UploadResult(UUID uuid, ValidationResult validationResult) {
 }

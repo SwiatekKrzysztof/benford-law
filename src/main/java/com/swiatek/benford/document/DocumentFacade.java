@@ -1,63 +1,68 @@
 package com.swiatek.benford.document;
 
-import com.swiatek.benford.document.events.NewValidDocumentSavedEvent;
 import com.swiatek.benford.document.result.UploadResult;
 import com.swiatek.benford.document.result.ValidationResult;
+import com.swiatek.benford.graph.GraphFacade;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
+import java.io.File;
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class DocumentFacade {
-    DocumentContentValidator contentValidator;
+    DocumentContentProcessor contentProcessor;
+    DocumentFileService fileService;
     UploadedDocumentRepository documentRepository;
-    ApplicationEventPublisher publisher;
+    GraphFacade graphFacade;
 
-    public UploadResult uploadDocument(byte[] fileContent, String title) {
-        Long start = System.currentTimeMillis();
-        final ValidationResult validationResult = contentValidator.validateDocument(fileContent);
-        Long stopValidation = System.currentTimeMillis();
-        Long startSave = System.currentTimeMillis();
-        Long generatedId = -1L;
-        if (validationResult == ValidationResult.SUCCESS) {
-            generatedId = saveDocumentAndPublishEvent(fileContent, title);
-        }
-        Long stop = System.currentTimeMillis();
-        long result = stop - start;
-        long validation = stopValidation - start;
-        long save = stop - startSave;
-        log.info("FULL:  " + result);
-        log.info("VALID: " + validation);
-        log.info("SAVE:  " + save);
-        //TODO validation is much faster than save, maybe return id that will be assigned to database row???
-        return new UploadResult(generatedId, validationResult);
+    public Mono<UploadResult> uploadDocument(Mono<FilePart> file, String title, UUID uuid) {
+        return contentProcessor.validateAndGetLines(file)
+                .doOnNext(fileLines -> saveDocumentAndStartGraphCreation(file, fileLines, title, uuid).subscribe())
+                .flatMap(fileLines -> Mono.just(new UploadResult(uuid, ValidationResult.SUCCESS)))
+                .switchIfEmpty(Mono.just(new UploadResult(null, ValidationResult.INCORRECT_DATA_FORMAT)));
     }
 
-    @Transactional
-    Long saveDocumentAndPublishEvent(byte[] fileContent, String title) {
-        LocalDateTime now = LocalDateTime.now();
-        UploadedDocumentEntity document = new UploadedDocumentEntity();
-        document.setTitle(title);
-        document.setContent(fileContent);
-        document.setTimeAdded(now);
-        final UploadedDocumentEntity savedDocument = documentRepository.save(document);
-        long generatedId = savedDocument.getId();
-        publisher.publishEvent(new NewValidDocumentSavedEvent(generatedId, fileContent));
-        return generatedId;
+    public Flux<UploadedDocument> getUploadedDocuments() {
+        return documentRepository.findAllTitles()
+                .map(UploadedDocumentEntity::to);
     }
 
-    public Optional<UploadedDocument> getUploadedData(Long id) {
-        return documentRepository.findById(id).map(UploadedDocumentEntity::to);
+    public Flux<UploadedDocument> getUploadedDocumentsByUuids(List<String> uuids) {
+        return Flux.just(uuids.stream().filter(Objects::nonNull).map(UUID::fromString).collect(Collectors.toList()))
+                .flatMap(documentRepository::findByUuidInOrderByTimeAddedDesc)
+                .map(UploadedDocumentEntity::to);
+    }
+
+    Mono<Void> saveDocumentAndStartGraphCreation(Mono<FilePart> fileMono, List<String> fileLines, String title, UUID uuid) {
+        return fileMono
+//                .delayElement(Duration.ofMillis(10000))
+                .doOnNext(file -> fileService.saveFile(file, uuid).subscribe())
+                .map(ignore -> new UploadedDocumentEntity(title, uuid, LocalDateTime.now()))
+                .flatMap(documentRepository::save)
+                .flatMap(savedEntity -> graphFacade.createGraphOnDocumentSaved(fileLines, uuid))
+                .then();
+    }
+
+    public Mono<UploadedDocument> getUploadedData(UUID uuid) {
+        return documentRepository.findByUuid(uuid).map(UploadedDocumentEntity::to);
+    }
+
+    public Mono<File> getFileContentByUuid(UUID uuid) {
+        return fileService.getFile(uuid);
     }
 
 }

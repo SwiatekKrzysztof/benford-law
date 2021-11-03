@@ -3,6 +3,7 @@ package com.swiatek.benford.commons;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
@@ -16,11 +17,17 @@ public class BenfordLawValidator {
         final Long sampleSize = digitsWithCount.values().stream().reduce(Long::sum).orElse(0L);
         double m = Math.sqrt(sampleSize) * calculateMaxDeviation(digitsWithCount, sampleSize);
         double d = Math.sqrt(sampleSize) * calculateDistance(digitsWithCount, sampleSize);
-
-        log.info("M: " + m);
-        log.info("D: " + d);
         //assumed lowest significance level
         return (m <= 1.191 && d <= 1.012);
+    }
+
+    public Map<Integer, Long> getIdealDigitsMapForSampleSize(Long sampleSize) {
+        Map<Integer, Long> map = new HashMap<>();
+        for (int i = 1; i < 10; i++) {
+            double doubleCount = Math.log10((1.0 + (1.0 / i))) * sampleSize.doubleValue();
+            map.put(i, Math.round(doubleCount));
+        }
+        return map;
     }
 
     private double calculateMaxDeviation(Map<Integer, Long> digitsWithCount, Long sampleSize) {

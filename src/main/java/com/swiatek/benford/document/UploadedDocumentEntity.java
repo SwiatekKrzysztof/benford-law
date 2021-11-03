@@ -1,44 +1,34 @@
 package com.swiatek.benford.document;
 
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
 
-import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
-@Entity
-@Table(name = "uploaded_document")
-@Getter
-@Setter
+@Table("uploaded_document")
+@Data
 @NoArgsConstructor
 class UploadedDocumentEntity {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Long id;
 
-    @Column(name = "document_title")
+    private UUID uuid;
+
     private String title;
 
-    @Column(name = "time_added")
     private LocalDateTime timeAdded;
 
-    @Column(name = "content")
-    @Basic(fetch = FetchType.LAZY)
-    private byte[] content;
-
-    public UploadedDocumentEntity(final String title, final LocalDateTime timeAdded, final byte[] content) {
+    public UploadedDocumentEntity(final String title, UUID uuid, final LocalDateTime timeAdded) {
         this.title = title;
+        this.uuid = uuid;
         this.timeAdded = timeAdded;
-        this.content = content;
-    }
-
-    static UploadedDocumentEntity from(UploadedDocument dto) {
-        return new UploadedDocumentEntity(dto.getTitle(), dto.getTimeAdded(), dto.getContent());
     }
 
     UploadedDocument to() {
-        return new UploadedDocument(id, title, timeAdded, content);
+        return new UploadedDocument(id, uuid, title, timeAdded);
     }
 }
