@@ -22,10 +22,6 @@ public class Graph {
     Long eightsCount;
     Long ninesCount;
 
-    Long getTotalCount() {
-        return onesCount+twosCount+threesCount+foursCount+fivesCount+sixesCount+sevensCount+eightsCount+ninesCount;
-    }
-
     public Graph(UUID documentUuid, boolean matchesBenfordLaw, Map<Integer, Long> digitsWithCount) {
         this.documentUuid = documentUuid;
         this.matchesBenfordLaw = matchesBenfordLaw;

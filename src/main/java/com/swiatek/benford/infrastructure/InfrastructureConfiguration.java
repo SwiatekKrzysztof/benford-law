@@ -3,66 +3,35 @@ package com.swiatek.benford.infrastructure;
 import com.swiatek.benford.document.DocumentFacade;
 import io.r2dbc.postgresql.PostgresqlConnectionConfiguration;
 import io.r2dbc.postgresql.PostgresqlConnectionFactory;
-import io.r2dbc.spi.Connection;
-import io.r2dbc.spi.ConnectionFactories;
-import io.r2dbc.spi.ConnectionFactory;
-import io.r2dbc.spi.ConnectionFactoryOptions;
 import lombok.AllArgsConstructor;
-import org.reactivestreams.Publisher;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
-import static io.r2dbc.spi.ConnectionFactoryOptions.*;
-
 @Configuration
 @AllArgsConstructor
+@Slf4j
 public class InfrastructureConfiguration {
 
     Environment environment;
-//    ConnectionFactory connectionFactory;
-//    Publisher<? extends Connection> connectionPublisher;
-//
-//    public InfrastructureConfiguration(Environment environment) {
-//        this.environment = environment;
-////        this.connectionFactory = ConnectionFactories.get(environment.getProperty("SPRING.R2DBC.URL"));
-//        this.connectionFactory = ConnectionFactories.get(ConnectionFactoryOptions.builder()
-//                .option(DRIVER, "postgresql")
-//                .option(HOST, environment.getProperty("db.host"))
-////                .option(PORT, 5432)  // optional, defaults to 5432
-//                .option(USER,environment.getProperty("spring.r2dbc.username"))
-//                .option(PASSWORD, environment.getProperty("spring.r2dbc.password"))
-////                .option(DATABASE, "...")  // optional
-////                .option(OPTIONS, options) // optional
-//                .build());
-//        this.connectionPublisher = connectionFactory.create();
-//    }
 
     @Bean
     PostgresqlConnectionFactory connectionFactory() {
-        return new PostgresqlConnectionFactory(
+        PostgresqlConnectionConfiguration.Builder factory =
                 PostgresqlConnectionConfiguration.builder()
-                        .username(environment.getProperty("spring.r2dbc.username"))
-                        .password(environment.getProperty("spring.r2dbc.password"))
-                        .host(environment.getProperty("db.host"))
-                .build());
-//        return ConnectionFactories.get(ConnectionFactoryOptions.builder()
-//                .option(DRIVER, "postgresql")
-//                .option(HOST, environment.getProperty("db.host"))
-////                .option(PORT, 5432)  // optional, defaults to 5432
-//                .option(USER,environment.getProperty("spring.r2dbc.username"))
-//                .option(PASSWORD, environment.getProperty("spring.r2dbc.password"))
-////                .option(DATABASE, "...")  // optional
-////                .option(OPTIONS, options) // optional
-//                .build());
+                        .username(environment.getProperty("spring.r2dbc.username","NULL_USERNAME"))
+                        .password(environment.getProperty("spring.r2dbc.password", "NULL_PASSWORD"))
+                        .host(environment.getProperty("db.host","NULL_HOST"))
+                        .database(environment.getProperty("db.name","NULL_NAME"))
+                        .port(Integer.valueOf(environment.getProperty("db.port","5432")))
+                ;
+        log.info(factory.toString());
+        return new PostgresqlConnectionFactory(factory.build());
     }
 
     @Bean
     DocumentController documentController(DocumentFacade documentFacade, PostgresqlConnectionFactory connectionFactory) {
         return new DocumentController(documentFacade, connectionFactory);
     }
-
-
-
-
 }

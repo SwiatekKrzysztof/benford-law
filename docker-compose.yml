@@ -15,9 +15,7 @@ services:
       - SPRING_R2DBC_URL=r2dbc:postgresql://pg:5432/compose-postgres
       - SPRING_R2DBC_USERNAME=compose-postgres
       - SPRING_R2DBC_PASSWORD=compose-postgres
-#      - SPRING_DATA_MONGODB_URI=mongodb://mg:27017/compose-mongo
-#      - SPRING_DATA_USERNAME=compose-mongo
-#      - SPRING_DATA_PASSWORD=compose-mongo
+      - DB_HOST=pg
 
 
   pg:
@@ -30,12 +28,3 @@ services:
       - POSTGRES_PASSWORD=compose-postgres
     volumes:
       - ./schema.sql:/docker-entrypoint-initdb.d/init.sql
-
-#  mg:
-#    image: 'mongo:5.0.3'
-#    container_name: mongo
-#    ports:
-#      - "27017:27017"
-#    environment:
-#      - MONGO_INITDB_ROOT_USERNAME=compose-mongo
-#      - MONGO_INITDB_ROOT_PASSWORD=compose-mongo

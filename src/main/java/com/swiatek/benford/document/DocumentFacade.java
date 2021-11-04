@@ -7,12 +7,13 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.io.File;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -61,8 +62,9 @@ public class DocumentFacade {
         return documentRepository.findByUuid(uuid).map(UploadedDocumentEntity::to);
     }
 
-    public Mono<File> getFileContentByUuid(UUID uuid) {
-        return fileService.getFile(uuid);
+    public Mono<Resource> getFileByUuid(UUID uuid) {
+        return fileService.getFile(uuid)
+                .map(FileSystemResource::new);
     }
 
 }

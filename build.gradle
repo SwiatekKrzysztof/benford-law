@@ -36,7 +36,7 @@ dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools:2.5.5'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor:2.5.5'
     annotationProcessor 'org.projectlombok:lombok:1.18.22'
-    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+    testImplementation('org.springframework.boot:spring-boot-starter-test:2.5.5') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
     testImplementation 'org.testcontainers:spock:1.16.0'

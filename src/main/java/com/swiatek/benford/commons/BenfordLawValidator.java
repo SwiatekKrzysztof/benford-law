@@ -18,7 +18,7 @@ public class BenfordLawValidator {
         double m = Math.sqrt(sampleSize) * calculateMaxDeviation(digitsWithCount, sampleSize);
         double d = Math.sqrt(sampleSize) * calculateDistance(digitsWithCount, sampleSize);
         //assumed lowest significance level
-        return (m <= 1.191 && d <= 1.012);
+        return (m <= 0.851 && d <= 1.212);
     }
 
     public Map<Integer, Long> getIdealDigitsMapForSampleSize(Long sampleSize) {

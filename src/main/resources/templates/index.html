@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
     <title>Title</title>
 </head>
 <link th:href="@{/webjars/bootstrap/5.1.3/css/bootstrap.css}" th:rel="stylesheet">
@@ -50,36 +50,48 @@
     <div class="d-flex" id="wrapper">
         <div class="bg-dark border-right vh-100 h-100 overflow-auto" id="sidebar-wrapper">
             <div class="text-light sidebar-heading">Documents</div>
-            <a class="list-group-item sidebar-heading list-group-item-action text-light bg-secondary"
-               data-bs-toggle="collapse"
-               href="#sidebar-nav-users" role="button" aria-expanded="false" aria-controls="collapseExample">
+            <a aria-controls="collapseExample"
+               aria-expanded="false"
+               class="list-group-item sidebar-heading list-group-item-action text-light bg-secondary"
+               data-bs-toggle="collapse" href="#sidebar-nav-users" role="button">
                 Your
             </a>
-            <div id="sidebar-nav-users" class="collapse list-group list-group-flush show">
+            <div class="collapse list-group list-group-flush show" id="sidebar-nav-users">
             </div>
-            <a class="list-group-item sidebar-heading list-group-item-action text-light bg-dark"
-               data-bs-toggle="collapse"
-               href="#sidebar-nav" role="button" aria-expanded="false" aria-controls="collapseExample">
+            <a aria-controls="collapseExample"
+               aria-expanded="false"
+               class="list-group-item sidebar-heading list-group-item-action text-light bg-dark"
+               data-bs-toggle="collapse" href="#sidebar-nav" role="button">
                 All
             </a>
-            <div id="sidebar-nav" class="collapse list-group list-group-flush">
+            <div class="collapse list-group list-group-flush show" id="sidebar-nav">
             </div>
 
         </div>
         <div id="page-content-wrapper">
             <nav class="navbar navbar-expand-lg .navbar-dark bg-dark border-bottom">
-                <button id="upload-button" class="btn-dark form-control" onclick="uploadDocument();">Upload document
+                <button class="btn-dark form-control" id="upload-button" onclick="uploadDocument();">Upload document
                 </button>
-                <label for="formFile" class="form-label">File input</label>
-                <input class="form-control" type="file" id="formFile">
+                <label class="form-label" for="formFile">File input</label>
+                <input class="form-control" id="formFile" type="file">
             </nav>
-            <div class="container-fluid">
+            <div class="container-fluid bg-light">
                 <div class="col-12">
-                    <a>You can find your uploaded in "Your" tab!</a>
-                    <canvas id="myChart" class="col-6"></canvas>
+                    <canvas class="col-6" id="myChart"></canvas>
                 </div>
-                <div id="file-content" class="col-12">
+                <div class="row">
+                    <div class="col-6 d-grid gap-2" id="file-content">
+                    </div>
+                        <div id="alert-not-matching" class="alert alert-danger col-6" style="display: none; margin-bottom: 0"
+                             role="alert">
+                            Does not match Benford Law based on Morrow formula
+                        </div>
+                        <div id="alert-matching" class="alert alert-info col-6" style="display: none; margin-bottom: 0"
+                             role="alert">
+                            Matches Benford Law based on Morrow formula
+                        </div>
                 </div>
+
             </div>
         </div>
     </div>
@@ -90,70 +102,55 @@
 <script th:src="@{/webjars/bootstrap/5.1.3/js/bootstrap.min.js}"></script>
 <script>
     window.addEventListener('load', function () {
-        populateSidebar();
-        populateUserSidebar();
-        // startRefreshingSidebar()
+        populateDefaultDocumentList();
+        populateUserDocumentList();
         setupCanvas();
-        initiateFlux();
+        listenForNewDocuments();
     });
 
-    async function startRefreshingUserSidebar() {
-        let sidebar_nav = document.getElementById("sidebar-nav-users");
-        while (sidebar_nav.childElementCount < getUserUUIDs().length) {
-            await populateUserSidebar()
-            await new Promise(r => setTimeout(r, 2000));
-        }
-    }
-
-    // async function startRefreshingSidebar() {
-    //     while (true) {
-    //         await populateSidebar()
-    //         let minute = 60 * 1000
-    //         await new Promise(r => setTimeout(r, minute));
-    //     }
-    // }
-
-    function initiateFlux() {
-        var sidebar = document.getElementById("sidebar-nav");
-
-        var source = new EventSource("http://localhost:8080/document/listflux");
-        source.addEventListener("message", function(event) {
-            let event_data = JSON.parse(JSON.parse(event.data).parameter)
-            let new_entry =
-                "            <a title=" + event_data.uuid + " onclick=\"getGraph(this);\" href=\"#\"\n" +
-                "               class=\"list-group-item list-group-item-action text-light bg-dark\">\n" +
-                "                <span>" + event_data.title + "</span>\n" +
-                "            </a>"
-            console.log(event_data)
-            sidebar.innerHTML = new_entry + sidebar.innerHTML;
+    function listenForNewDocuments() {
+        const source = new EventSource("http://localhost:8080/document/list/updates");
+        source.addEventListener("message", function (event) {
+            let eventData = JSON.parse(JSON.parse(event.data).parameter)
+            addNewDocumentToChosenDocumentList(eventData.uuid, eventData.title, false)
         });
     }
 
-    async function populateUserSidebar() {
-        var user_uuids = getUserUUIDs();
-        const response = await fetch('http://localhost:8080/document/list', {
-            method: 'POST',
-            body: JSON.stringify(user_uuids),
-            headers: {
-                'Content-Type': 'application/json'
+    const userSidebar = document.getElementById("sidebar-nav-users");
+    const sidebar = document.getElementById("sidebar-nav");
+
+    function addNewDocumentToChosenDocumentList(uuid, title, addToUserSidebar) {
+        let newEntry = document.createElement("a");
+        newEntry.setAttribute("title", uuid);
+        newEntry.setAttribute("onClick", "getGraph(this)");
+        newEntry.setAttribute("href", "#");
+        newEntry.setAttribute("class", "list-group-item list-group-item-action text-light bg-dark");
+        newEntry.appendChild(document.createTextNode(title))
+        if (addToUserSidebar) {
+            userSidebar.insertBefore(newEntry, userSidebar.firstChild);
+        } else {
+            sidebar.insertBefore(newEntry, sidebar.firstChild);
+        }
+    }
+
+    async function populateUserDocumentList() {
+        let user_uuids = getUserUUIDs();
+        if (user_uuids !== undefined && user_uuids !== null) {
+            const response = await fetch('http://localhost:8080/document/list', {
+                method: 'POST',
+                body: JSON.stringify(user_uuids),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const myJson = await response.json();
+            for (let i = 0; i < myJson.length; i++) {
+                addNewDocumentToChosenDocumentList(myJson[i].uuid, myJson[i].title, true)
             }
-        });
-        const myJson = await response.json();
-
-        let sidebar_nav = document.getElementById("sidebar-nav-users");
-        var new_sidebar = "";
-        for (let i = 0; i < myJson.length; i++) {
-            new_sidebar +=
-                "            <a title=" + myJson[i].uuid + " onclick=\"getGraph(this);\" href=\"#\"\n" +
-                "               class=\"list-group-item list-group-item-action text-light bg-dark\">\n" +
-                "                <span>" + myJson[i].title + "</span>\n" +
-                "            </a>"
         }
-        sidebar_nav.innerHTML = new_sidebar
-        return myJson
     }
 
-    async function populateSidebar() {
+    async function populateDefaultDocumentList() {
         const response = await fetch('http://localhost:8080/document/all', {
             method: 'GET',
             headers: {
@@ -161,20 +158,62 @@
             }
         });
         const myJson = await response.json();
-
-        let sidebar_nav = document.getElementById("sidebar-nav");
-        var new_sidebar = "";
         for (let i = 0; i < myJson.length; i++) {
-            new_sidebar +=
-                "            <a title=" + myJson[i].uuid + " onclick=\"getGraph(this);\" href=\"#\"\n" +
-                "               class=\"list-group-item list-group-item-action text-light bg-dark\">\n" +
-                "                <span>" + myJson[i].title + "</span>\n" +
-                "            </a>"
+            addNewDocumentToChosenDocumentList(myJson[i].uuid, myJson[i].title, false)
         }
-        sidebar_nav.innerHTML = new_sidebar
     }
 
-    function updateStorage(uuid) {
+    async function uploadDocument() {
+        resetUploadButtonText();
+        let input = document.querySelector('input[type="file"]')
+        if (input.files[0] !== undefined) {
+            let data = new FormData()
+            data.append('file', input.files[0])
+            document.getElementById("upload-button").disabled = true
+            setUploadButtonText("Uploading...")
+            const response = await fetch('/upload/file', {
+                method: 'POST',
+                body: data
+            }).then(resp => {
+                document.getElementById("upload-button").disabled = false
+                if (resp.status === 200) {
+                    setUploadButtonText("Upload successful")
+                } else {
+                    setUploadButtonText("Upload failed")
+                }
+                return resp
+            })
+            let json = await response.json()
+            if (json.uuid !== null && json.uuid !== -1) {
+                updateLocalStorage(json.uuid)
+                addNewDocumentToChosenDocumentList(json.uuid, input.files[0].name, true)
+            }
+        } else {
+            setUploadButtonText("No file chosen!")
+        }
+    }
+
+    function triggerMatchingAlert(matchesBenfordLaw) {
+        let matching = document.getElementById("alert-matching");
+        let notMatching = document.getElementById("alert-not-matching");
+        matching.style.display = "none"
+        notMatching.style.display = "none"
+        if (matchesBenfordLaw) {
+            matching.style.display = "block"
+        } else {
+            notMatching.style.display = "block"
+        }
+    }
+
+    function setUploadButtonText(text) {
+        document.getElementById("upload-button").textContent = text
+    }
+
+    function resetUploadButtonText() {
+        document.getElementById("upload-button").textContent = "Upload file"
+    }
+
+    function updateLocalStorage(uuid) {
         if (uuid !== null) {
             let storage = window.localStorage;
             let uuids = JSON.parse(storage.getItem("UUIDs"));
@@ -193,79 +232,25 @@
         return JSON.parse(storage.getItem("UUIDs"))
     }
 
-    async function uploadDocument() {
-        resetUploadButtonText();
-        var input = document.querySelector('input[type="file"]')
-        if (input.files[0] !== undefined) {
-            var data = new FormData()
-            data.append('file', input.files[0])
-            document.getElementById("upload-button").disabled = true
-            const response = await fetch('/upload/file', {
-                method: 'POST',
-                body: data
-            }).then(resp => {
-                document.getElementById("upload-button").disabled = false
-                if (resp.status === 200) {
-                    setUploadButtonText("Upload successful")
-                } else {
-                    setUploadButtonText("Upload failed")
-                }
-                populateUserSidebar()
-                return resp
-            })
-            let json = await response.json()
-            if (json.uuid !== -1) {
-                updateStorage(json.uuid)
-                startRefreshingUserSidebar()
-            }
-        } else {
-            setUploadButtonText("No file chosen!")
-        }
-    }
-
-    function setUploadButtonText(text) {
-        document.getElementById("upload-button").textContent = text
-    }
-
-    function resetUploadButtonText() {
-        document.getElementById("upload-button").textContent = "Upload file"
-    }
-
-    var myChart;
+    var mainChart;
 
     async function getGraph(e) {
-        var uuid = e.title
-        console.log(uuid)
+        let uuid = e.title
         const response = await fetch('http://localhost:8080/graph/' + uuid, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
             }
         });
-        const myJson = await response.json();
-        console.log(myJson)
-        myChart.config.options.plugins.title.text = e.text + " " + uuid
-        for (let i = 0; i < 20; i++) {
-            removeData()
-        }
+        const json = await response.json();
+        mainChart.config.options.plugins.title.text = e.text + " " + uuid
 
+        removeData()
         createLoadDataButton(uuid)
-        addData(myJson)
-        let sampleSize = getSampleSize(myJson);
-        console.log(sampleSize)
-        await getIdealBenfordGraph(sampleSize)
-    }
-
-    function getSampleSize(json) {
-        return json.onesCount+
-        json.twosCount +
-        json.threesCount +
-        json.foursCount +
-        json.fivesCount +
-        json.sixesCount +
-        json.sevensCount +
-        json.eightsCount +
-        json.ninesCount;
+        addRealDataToChart(json)
+        let idealGraphData = await getIdealBenfordGraph(getSampleSize(json))
+        addIdealBenfordDataToChart(idealGraphData)
+        triggerMatchingAlert(json.matchesBenfordLaw)
     }
 
     async function getIdealBenfordGraph(sampleSize) {
@@ -275,42 +260,53 @@
                 'Content-Type': 'application/json'
             }
         });
-        const json = await response.json();
-        console.log(json)
-        addDataToBaselineBenford(json)
+        return await response.json()
+    }
+
+    function getSampleSize(json) {
+        return json.onesCount +
+            json.twosCount +
+            json.threesCount +
+            json.foursCount +
+            json.fivesCount +
+            json.sixesCount +
+            json.sevensCount +
+            json.eightsCount +
+            json.ninesCount;
     }
 
     function createLoadDataButton(uuid) {
         let fileContent = document.getElementById("file-content");
-        fileContent.innerHTML = "<button class=\"btn-dark form-control\" onclick=\"loadFileContent('" + uuid + "');\">Load data</button>"
+        fileContent.innerHTML = "<button id='download-file-button' class=\"btn-dark btn\" onclick=\"loadFileContent('" + uuid + "');\">Download file</button>"
     }
 
     async function loadFileContent(uuid) {
-        let response = await fetch('http://localhost:8080/document/content/' + uuid, {
+        let resultFile = await fetch('http://localhost:8080/document/content/' + uuid, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
             }
-        });
-        console.log(response)
-        const json = await response.json()
-        console.log(json)
-        let newDivContent = "";
-        for (let i = 0; i < json.length; i++) {
-            newDivContent += "<a>"+json[i]+"</a>"
+        })
+            .then(result => result.blob())
+            .then(blob => {
+                let file = window.URL.createObjectURL(blob)
+                window.location.assign(file)
+            });
+        console.log(resultFile)
+        if(resultFile.status !== 200) {
+            document.getElementById("document-file-button").textContent = "Sorry, no file found!"
         }
-        fileContent.innerHTML = newDivContent;
     }
 
-    function addData(json) {
-        myChart.data.datasets.forEach((dataset) => {
+    function addRealDataToChart(json) {
+        mainChart.data.datasets.forEach((dataset) => {
             if (dataset.label === 'Input') {
-                if(json.matchesBenfordLaw) {
-                    dataset.borderColor= 'rgba(0,255,229,0.24)'
-                    dataset.backgroundColor= 'rgba(0,255,255,0.42)'
+                if (json.matchesBenfordLaw) {
+                    dataset.borderColor = 'rgba(0,255,229,0.24)'
+                    dataset.backgroundColor = 'rgba(0,255,255,0.42)'
                 } else {
-                    dataset.borderColor= 'rgba(255,0,38,0.24)'
-                    dataset.backgroundColor= 'rgba(255,0,47,0.42)'
+                    dataset.borderColor = 'rgba(255,0,38,0.24)'
+                    dataset.backgroundColor = 'rgba(255,0,47,0.42)'
                 }
                 dataset.data.push(json.onesCount);
                 dataset.data.push(json.twosCount);
@@ -323,11 +319,11 @@
                 dataset.data.push(json.ninesCount);
             }
         });
-        myChart.update();
+        mainChart.update();
     }
 
-    function addDataToBaselineBenford(json) {
-        myChart.data.datasets.forEach((dataset) => {
+    function addIdealBenfordDataToChart(json) {
+        mainChart.data.datasets.forEach((dataset) => {
             if (dataset.label === 'Benford') {
                 dataset.data.push(json.onesCount);
                 dataset.data.push(json.twosCount);
@@ -340,15 +336,14 @@
                 dataset.data.push(json.ninesCount);
             }
         });
-        myChart.update();
+        mainChart.update();
     }
 
     function removeData() {
-        // myChart.data.labels.pop();
-        myChart.data.datasets.forEach((dataset) => {
-                dataset.data = []
+        mainChart.data.datasets.forEach((dataset) => {
+            dataset.data = []
         });
-        myChart.update();
+        mainChart.update();
     }
 
     function setupCanvas() {
@@ -377,8 +372,6 @@
             data: data,
             options: {
                 indexAxis: 'y',
-                // Elements options apply to all of the options unless overridden in a dataset
-                // In this case, we are setting the border of each horizontal bar to be 2px wide
                 elements: {
                     bar: {
                         borderWidth: 2,
@@ -391,13 +384,11 @@
                     },
                     title: {
                         display: true,
-                        text: 'Chart.js Horizontal Bar Chart'
                     }
                 }
             },
         };
-        myChart = new Chart(ctx, config);
-        console.log("Chart set up!")
+        mainChart = new Chart(ctx, config);
     }
 
 </script>

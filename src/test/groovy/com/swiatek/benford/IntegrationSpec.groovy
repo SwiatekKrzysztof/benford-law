@@ -7,6 +7,8 @@ import reactor.blockhound.BlockHound
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
+import java.nio.file.Path
+
 @Slf4j
 @SpringBootTest(classes = [BenfordApplication], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 abstract class IntegrationSpec extends Specification {
@@ -29,5 +31,10 @@ abstract class IntegrationSpec extends Specification {
         System.setProperty("spring.r2dbc.url", "r2dbc:tc:postgresql:///test?TC_IMAGE_TAG=12.3")
         System.setProperty("spring.datasource.username", postgreSQLContainer.getUsername())
         System.setProperty("spring.datasource.password", postgreSQLContainer.getPassword())
+        System.setProperty("spring.r2dbc.username", postgreSQLContainer.getUsername())
+        System.setProperty("spring.r2dbc.password", postgreSQLContainer.getPassword())
+        System.setProperty("db.host", postgreSQLContainer.getHost())
+        System.setProperty("db.name", postgreSQLContainer.getDatabaseName())
+        System.setProperty("db.port", postgreSQLContainer.getFirstMappedPort().toString())
     }
 }

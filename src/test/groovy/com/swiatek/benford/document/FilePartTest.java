@@ -17,25 +17,25 @@ import java.nio.file.Path;
 
 public class FilePartTest implements FilePart {
 
-    private final String testContent;
     static final DataBufferFactory factory = new DefaultDataBufferFactory();
+    private final String testContent;
 
     public FilePartTest(String testContent) {
         this.testContent = testContent;
     }
 
     @Override
-    public String filename() {
+    public @NotNull String filename() {
         return name();
     }
 
     @Override
-    public Mono<Void> transferTo(Path dest) {
+    public @NotNull Mono<Void> transferTo(Path dest) {
         return DataBufferUtils.write(content(), dest);
     }
 
     @Override
-    public String name() {
+    public @NotNull String name() {
         return "name";
     }
 

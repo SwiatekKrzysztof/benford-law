@@ -11,7 +11,6 @@ import org.springframework.scheduling.annotation.EnableAsync;
 public class BenfordApplication {
 
     public static void main(String[] args) {
-//        BlockHound.install();
         SpringApplication.run(BenfordApplication.class, args);
     }
 

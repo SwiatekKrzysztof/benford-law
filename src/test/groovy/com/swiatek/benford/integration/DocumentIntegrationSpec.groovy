@@ -30,7 +30,7 @@ class DocumentIntegrationSpec extends IntegrationSpec implements DocumentData {
         UploadResult uploadResult = documentFacade.uploadDocument(Mono.just(input), title, uuid).block()
         then:
         UploadedDocument document
-        conditions.eventually{
+        conditions.eventually {
             document = documentFacade.getUploadedData(uploadResult.uuid()).block()
             document != null
             document.getTitle() == title
