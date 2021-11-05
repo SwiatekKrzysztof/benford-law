@@ -22,10 +22,8 @@ public class UploadController {
 
     @ResponseBody
     @PostMapping(value = "/file")
-    public Mono<ResponseEntity<UploadResult>> uploadFile(@RequestPart Mono<FilePart> file) {
-        return file.flatMap(filePart -> documentFacade.uploadDocument(file, filePart.filename(), UUID.randomUUID()))
-                .map(result -> result.validationResult().equals(ValidationResult.SUCCESS)
-                        ? new ResponseEntity<>(result, HttpStatus.OK)
-                        : new ResponseEntity<>(result, HttpStatus.BAD_REQUEST));
+    public Mono<ResponseEntity<UUID>> uploadFileAndAssignUuid(@RequestPart Mono<FilePart> file) {
+        return file.flatMap(filePart -> documentFacade.uploadDocumentAndAssignUuid(file, filePart.filename()))
+                .map(ResponseEntity::ok);
     }
 }

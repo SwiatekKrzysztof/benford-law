@@ -18,16 +18,13 @@ public class InfrastructureConfiguration {
 
     @Bean
     PostgresqlConnectionFactory connectionFactory() {
-        PostgresqlConnectionConfiguration.Builder factory =
-                PostgresqlConnectionConfiguration.builder()
-                        .username(environment.getProperty("spring.r2dbc.username","NULL_USERNAME"))
-                        .password(environment.getProperty("spring.r2dbc.password", "NULL_PASSWORD"))
-                        .host(environment.getProperty("db.host","NULL_HOST"))
-                        .database(environment.getProperty("db.name","NULL_NAME"))
-                        .port(Integer.valueOf(environment.getProperty("db.port","5432")))
-                ;
-        log.info(factory.toString());
-        return new PostgresqlConnectionFactory(factory.build());
+        return new PostgresqlConnectionFactory(PostgresqlConnectionConfiguration.builder()
+                .username(environment.getProperty("spring.r2dbc.username","NULL_USERNAME"))
+                .password(environment.getProperty("spring.r2dbc.password", "NULL_PASSWORD"))
+                .host(environment.getProperty("db.host","NULL_HOST"))
+                .database(environment.getProperty("db.name","NULL_NAME"))
+                .port(Integer.valueOf(environment.getProperty("db.port","5432")))
+                .build());
     }
 
     @Bean

@@ -5,7 +5,8 @@ create table if not exists uploaded_document
             primary key,
     uuid            UUID UNIQUE ,
     time_added     timestamp,
-    title varchar
+    title varchar,
+    validation_passed boolean
 );
 
 CREATE OR REPLACE FUNCTION notify_event() RETURNS TRIGGER AS
@@ -44,5 +45,12 @@ CREATE TRIGGER notify_document_added_event
     ON uploaded_document
     FOR EACH ROW
 EXECUTE PROCEDURE notify_event();;
+
+-- DROP TRIGGER IF EXISTS notify_graph_added_event on graph;
+-- CREATE TRIGGER notify_graph_added_event
+--     AFTER INSERT OR UPDATE OR DELETE
+--     ON graph
+--     FOR EACH ROW
+-- EXECUTE PROCEDURE notify_event();;
 
 

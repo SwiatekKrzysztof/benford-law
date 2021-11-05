@@ -24,8 +24,8 @@ public class DocumentFileService {
         return Mono.just(pathFromUuid(uuid).toFile());
     }
 
-    Mono<Void> saveFile(FilePart filePart, UUID uuid) {
-        return filePart.transferTo(pathFromUuid(uuid));
+    Mono<Void> saveFile(Mono<FilePart> filePart, UUID uuid) {
+        return filePart.flatMap(file -> file.transferTo(pathFromUuid(uuid)));
     }
 
     private Path pathFromUuid(UUID uuid) {

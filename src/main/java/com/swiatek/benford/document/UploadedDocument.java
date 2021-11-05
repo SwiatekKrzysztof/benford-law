@@ -14,4 +14,6 @@ public class UploadedDocument {
     String title;
 
     LocalDateTime timeAdded;
+
+    Boolean validationPassed;
 }

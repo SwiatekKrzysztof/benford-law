@@ -12,7 +12,7 @@ import java.util.UUID;
 @Repository
 interface UploadedDocumentRepository extends ReactiveCrudRepository<UploadedDocumentEntity, Long> {
 
-    @Query("SELECT uuid, title, time_added FROM uploaded_document ORDER BY time_added DESC")
+    @Query("SELECT uuid, title, time_added, validation_passed FROM uploaded_document ORDER BY time_added DESC")
     Flux<UploadedDocumentEntity> findAllTitles();
 
     Flux<UploadedDocumentEntity> findByUuidInOrderByTimeAddedDesc(List<UUID> uuidList);

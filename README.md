@@ -6,7 +6,7 @@
   and deliver output to user when we obtain it, switching threads as needed.
 - For Benford law test I chose one based on John Morrow paper: http://www.johnmorrow.info/projects/benford/benfordMain.pdf
 - Utilising **SSE (Server-Sent Events)** we avoid unnecessary polling from users
-- We store `UUID`s of user's successfully uploaded documents in browser `Local Storage`
+- We store `UUID`s of user's uploaded documents in browser `Local Storage`
   so user can come back, and not search through all documents uploaded
 - Chart colors were picked with color-blindness in mind
 - **FOR STRETCH CHALLENGE**: It would need clarification is all the information uploaded by user important here or only the relevant column? I assumed former. Based on that, it would be bad idea to store potentially large files (maximal size should probably be decided for production) inside database. Because of that, we store files in directory with name changed to `UUID`, and store only reference in database.
@@ -26,10 +26,18 @@ If using java 13+ tests need to be run with
 as required by Blockhound
 
 ## Test files
+Integration tests are using Test Containers, so copy of schema.sql is needed in test resource folder\
+\
 Files for testing:
  - uscities2.csv taken from https://github.com/rleeap/Benfords-Law and modified as dataset conforming Benford Law
  - census_2009b.dms attached to task
 
+## Further development
+
+- To make it as scalable as possible we could use kafka/rabbitMQ as message broker
+- Implement "Your graph is ready" mechanism on frontend
+- Find a way to get rid of schema.sql in test/resources directory, as it is copy of benford/schema.sql (see **Tests** section)
+- Implement some sort of gateway for requests, that could control number of calls to API
 ## Task description
 
 In 1938, Frank Benford published a paper showing the distribution of the leading digit in many disparate sources of data. In all these sets of data, the number 1 was the leading digit about 30% of the time. Benford’s law has been found to apply to population numbers, death rates, lengths of rivers, mathematical distributions given by some power law, and physical constants like atomic weights and specific heats.

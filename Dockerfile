@@ -7,4 +7,4 @@ FROM azul/zulu-openjdk:17.0.0
 EXPOSE 8080
 COPY --from=GRADLE_BUILD /home/benford/build/libs/*.jar application.jar
 RUN mkdir "/files/"
-ENTRYPOINT ["java", "-jar", "application.jar"]
+ENTRYPOINT ["java","-Dspring.profiles.active=development", "-jar", "application.jar"]

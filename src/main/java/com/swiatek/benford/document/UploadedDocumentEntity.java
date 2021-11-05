@@ -22,13 +22,16 @@ class UploadedDocumentEntity {
 
     private LocalDateTime timeAdded;
 
-    public UploadedDocumentEntity(final String title, UUID uuid, final LocalDateTime timeAdded) {
+    private Boolean validationPassed;
+
+    public UploadedDocumentEntity(String title, UUID uuid, LocalDateTime timeAdded, Boolean validationPassed) {
         this.title = title;
         this.uuid = uuid;
         this.timeAdded = timeAdded;
+        this.validationPassed = validationPassed;
     }
 
     UploadedDocument to() {
-        return new UploadedDocument(id, uuid, title, timeAdded);
+        return new UploadedDocument(id, uuid, title, timeAdded, validationPassed);
     }
 }
