@@ -87,7 +87,7 @@
                     <div class="row">
                         <div class="col-6 d-grid gap-2" id="file-content">
                         </div>
-                        <div class="alert col-6" id="matching-alert" role="alert"
+                        <div class="" id="matching-alert" role="alert"
                              style="display: none; margin-bottom: 0">
 
                         </div>
@@ -159,7 +159,6 @@
         for (let i = 0; i < json.length; i++) {
             if (json[i].validationPassed) {
                 addEntryToAllDocumentsList(json[i].uuid, json[i].title, false)
-                console.log(json.length - 1)
                 if (i === json.length - 1) {
                     oldestEntryId = json[i].id
                 }
@@ -261,10 +260,10 @@
         alert.style.display = "block"
         let errorCountText = errorCount === null ? 0 : errorCount
         if (matchesBenfordLaw) {
-            alert.classList.add("alert-info")
+            alert.className = ("alert col-6 alert-info")
             alert.textContent = "Matches Benford Law based on Morrow formula with " + errorCountText + " errors"
         } else {
-            alert.classList.add("alert-danger")
+            alert.className = ("alert col-6 alert-danger")
             alert.textContent = "Does not match Benford Law based on Morrow formula with " + errorCountText + " errors"
         }
     }
@@ -280,23 +279,25 @@
     const mainChart = setupCanvas();
 
     async function getGraph(e) {
-        let uuid = e.title
-        const response = await fetch('http://localhost:8080/graph/' + uuid, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        const json = await response.json();
-        mainChart.config.options.plugins.title.text = e.text + " " + uuid
+        if (!e.disabled) {
+            let uuid = e.title
+            const response = await fetch('http://localhost:8080/graph/' + uuid, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const json = await response.json();
+            mainChart.config.options.plugins.title.text = e.text + " " + uuid
 
-        switchViewToChart()
-        removeData()
-        createLoadDataButton(uuid)
-        addRealDataToChart(json)
-        let idealGraphData = await getIdealBenfordGraph(getSampleSize(json))
-        addIdealBenfordDataToChart(idealGraphData)
-        triggerMatchingAlert(json.matchesBenfordLaw, json.errorCount)
+            switchViewToChart()
+            removeData()
+            createLoadDataButton(uuid)
+            addRealDataToChart(json)
+            let idealGraphData = await getIdealBenfordGraph(getSampleSize(json))
+            addIdealBenfordDataToChart(idealGraphData)
+            triggerMatchingAlert(json.matchesBenfordLaw, json.errorCount)
+        }
     }
 
     async function getIdealBenfordGraph(sampleSize) {

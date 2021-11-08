@@ -18,6 +18,7 @@ function addVerifiedEntryToUserList(uuid, title, validationPassed) {
         newEntry.classList.add("text-light")
     } else {
         newEntry.classList.add("text-danger")
+        newEntry.disabled = true
     }
     userSidebar.appendChild(newEntry)
 }

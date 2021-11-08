@@ -1,15 +1,12 @@
 function changeDocumentEntryValidationStatus(uuid, validationPassed) {
     let foundDocument = document.getElementById(uuid);
     removeLoaderFromEntry(foundDocument)
-
     if (validationPassed) {
         foundDocument.classList.replace("text-light", "text-info")
-        // foundDocument.classList.add("text-info")
-        // foundDocument.innerHTML = "<span class='text-info'>" + foundDocument.innerHTML + "</span>"
+        foundDocument.disabled = false
     } else {
         foundDocument.classList.replace("text-light", "text-danger")
-        // foundDocument.classList.add("text-danger")
-        // foundDocument.innerHTML = "<span class='text-danger'>" + foundDocument.innerHTML + "</span>"
+        foundDocument.disabled = true
     }
 }
 
