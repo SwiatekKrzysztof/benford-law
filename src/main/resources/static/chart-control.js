@@ -8,15 +8,7 @@ function addRealDataToChart(json) {
                 dataset.borderColor = 'rgba(255,0,38,0.24)'
                 dataset.backgroundColor = 'rgba(255,0,47,0.42)'
             }
-            dataset.data.push(json.onesCount);
-            dataset.data.push(json.twosCount);
-            dataset.data.push(json.threesCount);
-            dataset.data.push(json.foursCount);
-            dataset.data.push(json.fivesCount);
-            dataset.data.push(json.sixesCount);
-            dataset.data.push(json.sevensCount);
-            dataset.data.push(json.eightsCount);
-            dataset.data.push(json.ninesCount);
+            addDataToDataset(dataset, json)
         }
     });
     mainChart.update();
@@ -25,18 +17,22 @@ function addRealDataToChart(json) {
 function addIdealBenfordDataToChart(json) {
     mainChart.data.datasets.forEach((dataset) => {
         if (dataset.label === 'Benford') {
-            dataset.data.push(json.onesCount);
-            dataset.data.push(json.twosCount);
-            dataset.data.push(json.threesCount);
-            dataset.data.push(json.foursCount);
-            dataset.data.push(json.fivesCount);
-            dataset.data.push(json.sixesCount);
-            dataset.data.push(json.sevensCount);
-            dataset.data.push(json.eightsCount);
-            dataset.data.push(json.ninesCount);
+            addDataToDataset(dataset, json)
         }
     });
     mainChart.update();
+}
+
+function addDataToDataset(dataset, json) {
+    dataset.data.push(json.onesCount);
+    dataset.data.push(json.twosCount);
+    dataset.data.push(json.threesCount);
+    dataset.data.push(json.foursCount);
+    dataset.data.push(json.fivesCount);
+    dataset.data.push(json.sixesCount);
+    dataset.data.push(json.sevensCount);
+    dataset.data.push(json.eightsCount);
+    dataset.data.push(json.ninesCount);
 }
 
 function removeData() {
@@ -47,7 +43,7 @@ function removeData() {
 }
 
 function setupCanvas() {
-    const ctx = document.getElementById('myChart').getContext('2d');
+    const ctx = document.getElementById('mainChart').getContext('2d');
     const labels = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
     const data = {
         labels: labels,
@@ -88,5 +84,5 @@ function setupCanvas() {
             }
         },
     };
-    mainChart = new Chart(ctx, config);
+    return new Chart(ctx, config);
 }

@@ -8,7 +8,6 @@
 - Utilising **SSE (Server-Sent Events)** we avoid unnecessary polling from users
 - We store `UUID`s of user's uploaded documents in browser `Local Storage`
   so user can come back, and not search through all documents uploaded
-- Chart colors were picked with color-blindness in mind
 - **FOR STRETCH CHALLENGE**: It would need clarification is all the information uploaded by user important here or only the relevant column? I assumed former. Based on that, it would be bad idea to store potentially large files (maximal size should probably be decided for production) inside database. Because of that, we store files in directory with name changed to `UUID`, and store only reference in database.
 
 ## Running project
@@ -28,9 +27,9 @@ as required by Blockhound
 ## Test files
 Integration tests are using Test Containers, so copy of schema.sql is needed in test resource folder\
 \
-Files for testing:
- - uscities2.csv taken from https://github.com/rleeap/Benfords-Law and modified as dataset conforming Benford Law
- - census_2009b.dms attached to task
+Files for testing (`/files`):
+ - `uscities2.csv` taken from https://github.com/rleeap/Benfords-Law and modified as dataset conforming Benford Law
+ - `census_2009b.dms` attached to task
 
 ## Further development
 

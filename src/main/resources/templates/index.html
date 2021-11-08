@@ -6,94 +6,93 @@
 </head>
 <link th:href="@{/webjars/bootstrap/5.1.3/css/bootstrap.css}" th:rel="stylesheet">
 <link th:href="@{loader.css}" th:rel="stylesheet">
-<style>
-
-    body {
-        overflow-x: hidden;
-    }
-
-    #sidebar-wrapper {
-        min-height: 100vh;
-        margin-left: -15rem;
-        -webkit-transition: margin .25s ease-out;
-        -moz-transition: margin .25s ease-out;
-        -o-transition: margin .25s ease-out;
-        transition: margin .25s ease-out;
-    }
-
-    #sidebar-wrapper .sidebar-heading {
-        padding: 0.875rem 1.25rem;
-        font-size: 1.2rem;
-    }
-
-    #sidebar-wrapper .list-group {
-        width: 15rem;
-    }
-
-    #page-content-wrapper {
-        min-width: 100vw;
-    }
-
-
-    @media (min-width: 768px) {
-        #sidebar-wrapper {
-            margin-left: 0;
-        }
-
-        #page-content-wrapper {
-            min-width: 0;
-            width: 100%;
-        }
-    }
-</style>
+<link th:href="@{sidebar.css}" th:rel="stylesheet">
+<link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/all.min.css"
+      integrity="sha512-YWzhKL2whUzgiheMoBFwW8CKV4qpHQAEuvilg9FAn5VJUDwKZZxkJNuGM4XkWuk94WCrrwslk8yWNGmY1EduTA=="
+      referrerpolicy="no-referrer" rel="stylesheet"/>
 <body>
 <div class="col-12">
     <div class="d-flex" id="wrapper">
-        <div class="bg-dark border-right vh-100 h-100 overflow-auto" id="sidebar-wrapper">
-            <div class="text-light sidebar-heading">Documents</div>
-            <a aria-controls="collapseExample"
-               aria-expanded="false"
-               class="list-group-item sidebar-heading list-group-item-action text-light bg-secondary"
-               data-bs-toggle="collapse" href="#sidebar-nav-users" role="button">
-                Your
-            </a>
-            <div class="collapse list-group list-group-flush show" id="sidebar-nav-users">
+        <div class="bg-dark border-right vh-100 h-100" id="sidebar-wrapper">
+            <div id="sidebar-content">
+                <div class="text-light sidebar-heading">Documents
+                    <button class="btn-dark" onclick="switchViewToTutorial()"><i class="fas fa-info-circle"></i>
+                    </button>
+                </div>
+                <a aria-controls="collapseExample"
+                   aria-expanded="false"
+                   class="list-group-item sidebar-heading list-group-item-action text-light bg-secondary"
+                   data-bs-toggle="collapse" href="#sidebar-nav-users" role="button">
+                    Your
+                </a>
+                <div class="collapse list-group list-group-flush show" id="sidebar-nav-users">
+                </div>
+                <a aria-controls="collapseExample"
+                   aria-expanded="false"
+                   class="list-group-item sidebar-heading list-group-item-action text-light bg-dark"
+                   data-bs-toggle="collapse" href="#sidebar-nav" role="button">
+                    All
+                </a>
+                <div class="collapse list-group list-group-flush show" id="sidebar-nav">
+                    <a class="text-light sidebar-heading bg-dark list-group-item list-group-item-action "
+                       id="load-more-button" onclick="populateAllDocumentsListWithNextEntries()"
+                       role="button">Load more...</a>
+                </div>
             </div>
-            <a aria-controls="collapseExample"
-               aria-expanded="false"
-               class="list-group-item sidebar-heading list-group-item-action text-light bg-dark"
-               data-bs-toggle="collapse" href="#sidebar-nav" role="button">
-                All
-            </a>
-            <div class="collapse list-group list-group-flush show" id="sidebar-nav">
-            </div>
-
         </div>
         <div id="page-content-wrapper">
             <nav class="navbar navbar-expand-lg .navbar-dark bg-dark border-bottom">
-                <button class="btn-dark form-control" id="upload-button" onclick="uploadDocument();">Upload document
+                <button class="btn-outline-light btn-dark form-control" id="upload-button" onclick="uploadDocument();">
+                    Upload document
                 </button>
                 <label class="form-label" for="formFile">File input</label>
                 <input class="form-control" id="formFile" type="file">
             </nav>
             <div class="container-fluid bg-light">
-                <div class="col-12">
-                    <canvas class="col-6" id="myChart"></canvas>
-                </div>
-                <div class="row">
-                    <div class="col-6 d-grid gap-2" id="file-content">
-                    </div>
-                    <div id="alert-not-matching" class="alert alert-danger col-6"
-                         style="display: none; margin-bottom: 0"
-                         role="alert">
-                        Does not match Benford Law based on Morrow formula
-                    </div>
-                    <div id="alert-matching" class="alert alert-info col-6" style="display: none; margin-bottom: 0"
-                         role="alert">
-                        Matches Benford Law based on Morrow formula
-                    </div>
-                </div>
+                <div id="tutorial" style="display: none">
+                    <h5>To check if your data follows <a href="https://en.wikipedia.org/wiki/Benford%27s_law"
+                                                         rel="noopener noreferrer" target="_blank">Benford Law</a>:</h5>
+                    <ol>
+                        <li>Upload file with data</li>
+                        <li>New entry will appear under "Your" tab, after validation, if it changes colour to <strong
+                                class="text-info">blue</strong> - file format is ok, if to <strong
+                                class="text-danger">red</strong>
+                            - something is wrong (check File Format below)
+                        </li>
+                        <li>After file is validated with success, click on entry and your results will appear</li>
+                        <li>Watch out for number of errors - it means quantity of incorrect value fields in your
+                            document! They are not taken into account in calculations
+                        </li>
+                        <li>Feel free to browse through other users' data in "All" tab! Its content is updated as new
+                            documents are uploaded by users
+                        </li>
+                    </ol>
+                    <h5>File format</h5>
+                    <ul>
+                        <li>Column with data analyzed by program must be named <strong>7_2009</strong></li>
+                        <li>Values in a row must be separated with tab character (\t)</li>
+                        <li>See <a href="https://en.wikipedia.org/wiki/Tab-separated_values" rel="noopener noreferrer"
+                                   target="_blank">Tab-separated values</a> for more information
+                        </li>
+                        <li>Benford law applies to large datasets, if your dataset is small (<1000 entries) analysis
+                            results may be incorrect
+                        </li>
+                    </ul>
 
+                </div>
+                <div id="chart-area" style="display: none">
+                    <div class="col-12">
+                        <canvas class="col-6" id="mainChart"></canvas>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 d-grid gap-2" id="file-content">
+                        </div>
+                        <div class="alert col-6" id="matching-alert" role="alert"
+                             style="display: none; margin-bottom: 0">
+
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -102,72 +101,112 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.6.0/chart.min.js"></script>
 <script th:src="@{/webjars/popper.js/2.9.3/umd/popper.min.js}"></script>
 <script th:src="@{/webjars/bootstrap/5.1.3/js/bootstrap.min.js}"></script>
+<script th:src="@{events.js}"></script>
+<script th:src="@{local-storage.js}"></script>
+<script th:src="@{document-status-control.js}"></script>
+<script th:src="@{list-entry-appender.js}"></script>
 <script th:src="@{chart-control.js}"></script>
-<script th:src="@{document-list-control.js}"></script>
 <script>
     window.addEventListener('load', function () {
         populateAllDocumentListWithValidatedEntries();
         populateUserDocumentList();
-        setupCanvas();
         documentsUnderValidationPoll()
-        listenForNewDocuments();
+
+        listenForNewDocuments()
+        switchViewToTutorial()
     });
+
+    var oldestEntryId = 1;
+
+    const timer = ms => new Promise(res => setTimeout(res, ms))
+
+    async function populateAllDocumentsListWithNextEntries() {
+        let button = document.getElementById("load-more-button");
+        console.log(button.disabled)
+        if (!button.disabled) {
+            addLoaderToEntry(button)
+            button.disabled = true
+            const response = await fetch('http://localhost:8080/document/next/' + oldestEntryId + '?size=20', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const json = await response.json();
+            for (let i = 0; i < json.length; i++) {
+                if (json[i].validationPassed) {
+                    addEntryToAllDocumentsList(json[i].uuid, json[i].title, false)
+                }
+                if (i === json.length - 1) {
+                    oldestEntryId = json[i].id
+                    console.log("next=" + oldestEntryId)
+                }
+            }
+            removeLoaderFromEntry(button)
+            button.disabled = false
+        }
+    }
+
+
+    async function populateAllDocumentListWithValidatedEntries() {
+        const response = await fetch('http://localhost:8080/document/first/?size=20', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        const json = await response.json();
+        for (let i = 0; i < json.length; i++) {
+            if (json[i].validationPassed) {
+                addEntryToAllDocumentsList(json[i].uuid, json[i].title, false)
+                console.log(json.length - 1)
+                if (i === json.length - 1) {
+                    oldestEntryId = json[i].id
+                }
+            }
+        }
+        return oldestEntryId
+    }
 
     function listenForNewDocuments() {
         const source = new EventSource("http://localhost:8080/document/list/updates");
         source.addEventListener("message", function (event) {
             let eventData = JSON.parse(JSON.parse(event.data).parameter)
-            addNewDocumentToChosenDocumentList(eventData.uuid, eventData.title, false, false, eventData.validation_passed, false)
+            let uuid = eventData.uuid
+            let title = eventData.title
+            let validationPassed = eventData.validation_passed
+            allDocuments.push({"uuid": uuid, "validationPassed": validationPassed})
+            if (validationPassed) {
+                addEntryToAllDocumentsList(uuid, title, true)
+            }
         });
     }
 
-    const timer = ms => new Promise(res => setTimeout(res, ms))
-
     async function documentsUnderValidationPoll() {
         while (true) {
-            if (uuidsDuringValidation.length > 0) {
-                for (let documentEntry of uuidsDuringValidation) {
-                    let documentData = allDocuments.find(d => d.uuid === documentEntry.uuid);
-                    if (documentData) {
-                        console.log(documentData)
-                        let foundDocument = document.getElementById(documentEntry.uuid);
-                        removeLoaderFromEntry(foundDocument)
-
-                        if(documentData.validationPassed){
-                            foundDocument.innerHTML = "<span class='text-info'>" + foundDocument.innerHTML + "</span>"
-                        } else {
-                            foundDocument.innerHTML = "<span class='text-danger'>" + foundDocument.innerHTML + "</span>"
-                        }
-
-                        uuidsDuringValidation.splice(uuidsDuringValidation.indexOf(documentEntry), 1)
-                    } else {
-                        console.log("MATCH NOT FOUND")
-                    }
+            for (let documentEntry of uuidsDuringValidation) {
+                let documentData = allDocuments.find(d => d.uuid === documentEntry.uuid);
+                if (documentData) {
+                    changeDocumentEntryValidationStatus(documentData.uuid, documentData.validationPassed)
+                    uuidsDuringValidation.splice(uuidsDuringValidation.indexOf(documentEntry), 1)
                 }
             }
             await timer(1000)
         }
     }
 
-    const userSidebar = document.getElementById("sidebar-nav-users");
-    const sidebar = document.getElementById("sidebar-nav");
+    function switchViewToTutorial() {
+        document.getElementById('tutorial').style.display = 'block'
+        document.getElementById('chart-area').style.display = 'none'
+    }
+
+    function switchViewToChart() {
+        document.getElementById('tutorial').style.display = 'none'
+        document.getElementById('chart-area').style.display = 'block'
+    }
+
     const allDocuments = []
     const uuidsDuringValidation = []
-
-    function addLoaderToEntry(entry) {
-        let loaderDiv = document.createElement("div");
-        loaderDiv.className = "lds-dual-ring"
-        entry.appendChild(loaderDiv)
-    }
-
-    function removeLoaderFromEntry(entry) {
-        let children = entry.childNodes
-        for (let i = 0; i < children.length; i++) {
-            if(children[i].className !== undefined && children[i].className.includes("lds-dual-ring")) {
-                entry.removeChild(children[i])
-            }
-        }
-    }
 
     async function populateUserDocumentList() {
         let user_uuids = getUserUUIDs();
@@ -181,22 +220,7 @@
             });
             const json = await response.json();
             for (let i = 0; i < json.length; i++) {
-                addNewDocumentToChosenDocumentList(json[i].uuid, json[i].title, true, false, json[i].validationPassed, true)
-            }
-        }
-    }
-
-    async function populateAllDocumentListWithValidatedEntries() {
-        const response = await fetch('http://localhost:8080/document/all', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        const json = await response.json();
-        for (let i = 0; i < json.length; i++) {
-            if(json[i].validationPassed){
-                addNewDocumentToChosenDocumentList(json[i].uuid, json[i].title, false, false, true, true)
+                addVerifiedEntryToUserList(json[i].uuid, json[i].title, json[i].validationPassed)
             }
         }
     }
@@ -209,7 +233,7 @@
             data.append('file', input.files[0])
             document.getElementById("upload-button").disabled = true
             setUploadButtonText("Uploading...")
-            const response = await fetch('/upload/file', {
+            const response = await fetch('/file/upload', {
                 method: 'POST',
                 body: data
             }).then(resp => {
@@ -221,27 +245,27 @@
                 }
                 return resp
             })
-            let json = await response.json()
-            if (json !== null && json !== -1) {
-                updateLocalStorage(json)
-                uuidsDuringValidation.push({"uuid": json})
-                console.log(uuidsDuringValidation)
-                addNewDocumentToChosenDocumentList(json, input.files[0].name, true, true, false, false)
+            let uuid = await response.json()
+            if (uuid !== null) {
+                updateLocalStorage(uuid)
+                uuidsDuringValidation.push({"uuid": uuid})
+                addDummyEntryToUserList(uuid, input.files[0].name)
             }
         } else {
             setUploadButtonText("No file chosen!")
         }
     }
 
-    function triggerMatchingAlert(matchesBenfordLaw) {
-        let matching = document.getElementById("alert-matching");
-        let notMatching = document.getElementById("alert-not-matching");
-        matching.style.display = "none"
-        notMatching.style.display = "none"
+    function triggerMatchingAlert(matchesBenfordLaw, errorCount) {
+        let alert = document.getElementById("matching-alert");
+        alert.style.display = "block"
+        let errorCountText = errorCount === null ? 0 : errorCount
         if (matchesBenfordLaw) {
-            matching.style.display = "block"
+            alert.classList.add("alert-info")
+            alert.textContent = "Matches Benford Law based on Morrow formula with " + errorCountText + " errors"
         } else {
-            notMatching.style.display = "block"
+            alert.classList.add("alert-danger")
+            alert.textContent = "Does not match Benford Law based on Morrow formula with " + errorCountText + " errors"
         }
     }
 
@@ -253,26 +277,7 @@
         document.getElementById("upload-button").textContent = "Upload file"
     }
 
-    function updateLocalStorage(uuid) {
-        if (uuid !== null) {
-            let storage = window.localStorage;
-            let uuids = JSON.parse(storage.getItem("UUIDs"));
-            if (uuids !== null) {
-                uuids.push(uuid)
-                storage.setItem("UUIDs", JSON.stringify(uuids))
-            } else {
-                let newListOfUUIDs = [uuid]
-                storage.setItem("UUIDs", JSON.stringify(newListOfUUIDs))
-            }
-        }
-    }
-
-    function getUserUUIDs() {
-        let storage = window.localStorage;
-        return JSON.parse(storage.getItem("UUIDs"))
-    }
-
-    var mainChart;
+    const mainChart = setupCanvas();
 
     async function getGraph(e) {
         let uuid = e.title
@@ -285,12 +290,13 @@
         const json = await response.json();
         mainChart.config.options.plugins.title.text = e.text + " " + uuid
 
+        switchViewToChart()
         removeData()
         createLoadDataButton(uuid)
         addRealDataToChart(json)
         let idealGraphData = await getIdealBenfordGraph(getSampleSize(json))
         addIdealBenfordDataToChart(idealGraphData)
-        triggerMatchingAlert(json.matchesBenfordLaw)
+        triggerMatchingAlert(json.matchesBenfordLaw, json.errorCount)
     }
 
     async function getIdealBenfordGraph(sampleSize) {
@@ -321,21 +327,22 @@
     }
 
     async function loadFileContent(uuid) {
-        let resultFile = await fetch('http://localhost:8080/document/content/' + uuid, {
+        let resultFile = await fetch('http://localhost:8080/file/download/' + uuid, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
             }
         })
-            .then(result => result.blob())
+            .then(result => {
+                if (result.status !== 200) {
+                    document.getElementById("document-file-button").textContent = "Sorry, no file found!"
+                }
+                return result.blob()
+            })
             .then(blob => {
                 let file = window.URL.createObjectURL(blob)
                 window.location.assign(file)
             });
-        console.log(resultFile)
-        if (resultFile.status !== 200) {
-            document.getElementById("document-file-button").textContent = "Sorry, no file found!"
-        }
     }
 </script>
 </html>

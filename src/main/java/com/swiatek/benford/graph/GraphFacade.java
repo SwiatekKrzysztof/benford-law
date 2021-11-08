@@ -2,7 +2,6 @@ package com.swiatek.benford.graph;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -28,9 +27,5 @@ public class GraphFacade {
 
     public Mono<Graph> getIdealBenfordGraph(Long sampleSize) {
         return graphCreator.createBenfordGraph(sampleSize);
-    }
-
-    public Flux<Graph> getAllGraphs() {
-        return graphRepository.findAll().map(GraphEntity::to);
     }
 }

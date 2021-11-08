@@ -7,13 +7,11 @@ import reactor.blockhound.BlockHound
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
-import java.nio.file.Path
-
 @Slf4j
 @SpringBootTest(classes = [BenfordApplication], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 abstract class IntegrationSpec extends Specification {
 
-    def conditions = new PollingConditions(timeout: 15, initialDelay: 1.5, factor: 1.25)
+    def conditions = new PollingConditions(timeout: 15, initialDelay: 0.1, factor: 0.2)
 
     static {
         runPostgresql()
@@ -21,7 +19,7 @@ abstract class IntegrationSpec extends Specification {
     }
 
     final static PostgreSQLContainer postgreSQLContainer = new PostgreSQLContainer<>("postgres:12.3")
-    .withInitScript("schema.sql")
+            .withInitScript("schema.sql")
             .withDatabaseName("benford")
             .withUsername("sa")
             .withPassword("sa")

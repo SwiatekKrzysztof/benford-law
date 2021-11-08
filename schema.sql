@@ -9,6 +9,8 @@ create table if not exists uploaded_document
     validation_passed boolean
 );
 
+CREATE INDEX IF NOT EXISTS document_uuid_index ON uploaded_document (uuid);
+
 CREATE OR REPLACE FUNCTION notify_event() RETURNS TRIGGER AS
 '
 DECLARE
@@ -36,8 +38,10 @@ create table if not exists graph
     sixes_count         bigint,
     sevens_count        bigint,
     eights_count        bigint,
-    nines_count         bigint
+    nines_count         bigint,
+    error_count         bigint
 );
+CREATE INDEX IF NOT EXISTS graph_uuid_index ON graph (document_uuid);
 
 DROP TRIGGER IF EXISTS notify_document_added_event on uploaded_document;
 CREATE TRIGGER notify_document_added_event

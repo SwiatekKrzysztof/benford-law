@@ -8,14 +8,11 @@ import io.r2dbc.postgresql.api.PostgresqlConnection;
 import io.r2dbc.postgresql.api.PostgresqlResult;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
-import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import java.util.List;
-import java.util.UUID;
 
 @RequestMapping("/document")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -35,17 +32,16 @@ public class DocumentController {
         return ResponseEntity.ok(documentFacade.getUploadedDocumentsByUuids(uuids));
     }
 
-    @GetMapping("/all")
+    @GetMapping("/first")
     @ResponseBody
-    ResponseEntity<Flux<UploadedDocument>> getDocuments() {
-        return ResponseEntity.ok(documentFacade.getUploadedDocuments());
+    ResponseEntity<Flux<UploadedDocument>> getDocuments(@RequestParam Integer size) {
+        return ResponseEntity.ok(documentFacade.getTopSizeOfUploadedDocuments(size));
     }
 
-    @GetMapping("/content/{uuid}")
+    @PostMapping("/next/{currentLargestId}")
     @ResponseBody
-    Mono<ResponseEntity<Resource>> getDocumentFileContent(@PathVariable String uuid) {
-        return documentFacade.getFileByUuid(UUID.fromString(uuid))
-                .map(ResponseEntity::ok);
+    ResponseEntity<Flux<UploadedDocument>> getNextDocuments(@RequestParam Integer size, @PathVariable Long currentLargestId) {
+        return ResponseEntity.ok(documentFacade.getNextUploadedDocuments(currentLargestId, size));
     }
 
     @GetMapping("/list/updates")

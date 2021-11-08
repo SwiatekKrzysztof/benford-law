@@ -12,8 +12,11 @@ import java.util.UUID;
 @Repository
 interface UploadedDocumentRepository extends ReactiveCrudRepository<UploadedDocumentEntity, Long> {
 
-    @Query("SELECT uuid, title, time_added, validation_passed FROM uploaded_document ORDER BY time_added DESC")
-    Flux<UploadedDocumentEntity> findAllTitles();
+    @Query("SELECT id, uuid, title, time_added, validation_passed FROM uploaded_document WHERE id < :currentLargestId ORDER BY id DESC fetch first :size rows only")
+    Flux<UploadedDocumentEntity> findNextNumberOfDocumentsOlderThenId(Long currentLargestId, Integer size);
+
+    @Query("SELECT id, uuid, title, time_added, validation_passed FROM uploaded_document ORDER BY id DESC fetch first :size rows only")
+    Flux<UploadedDocumentEntity> findFirstNumberOfDocumentsOrderedByTimeAdded(Integer size);
 
     Flux<UploadedDocumentEntity> findByUuidInOrderByTimeAddedDesc(List<UUID> uuidList);
 

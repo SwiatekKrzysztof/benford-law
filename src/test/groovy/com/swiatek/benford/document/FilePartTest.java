@@ -30,7 +30,7 @@ public class FilePartTest implements FilePart {
     }
 
     @Override
-    public @NotNull Mono<Void> transferTo(Path dest) {
+    public @NotNull Mono<Void> transferTo(@NotNull Path dest) {
         return DataBufferUtils.write(content(), dest);
     }
 

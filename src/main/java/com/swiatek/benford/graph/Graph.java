@@ -21,6 +21,7 @@ public class Graph {
     Long sevensCount;
     Long eightsCount;
     Long ninesCount;
+    Long errorCount;
 
     public Graph(UUID documentUuid, boolean matchesBenfordLaw, Map<Integer, Long> digitsWithCount) {
         this.documentUuid = documentUuid;
@@ -34,5 +35,6 @@ public class Graph {
         this.sevensCount = digitsWithCount.get(7);
         this.eightsCount = digitsWithCount.get(8);
         this.ninesCount = digitsWithCount.get(9);
+        this.errorCount = digitsWithCount.get(null);
     }
 }

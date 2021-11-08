@@ -2,8 +2,6 @@ package com.swiatek.benford.commons
 
 import spock.lang.Specification
 
-import java.util.stream.Collectors
-
 class BenfordLawTest extends Specification {
 
     BenfordLawValidator benfordLawValidator = new BenfordLawValidator()
@@ -21,11 +19,6 @@ class BenfordLawTest extends Specification {
         Map<Integer, Long> ideal = benfordLawValidator.getIdealDigitsMapForSampleSize(10000)
         then:
         benfordLawValidator.doesDataMatchBenfordLaw(ideal)
-    }
-
-
-    static List<String[]> getRows(String dataset) {
-        dataset.lines().map(row -> row.split("\t")).collect(Collectors.toList())
     }
 
     static Map<Integer, Long> powersOfTwo(int n) {

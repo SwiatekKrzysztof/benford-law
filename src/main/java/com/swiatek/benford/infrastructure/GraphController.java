@@ -3,9 +3,7 @@ package com.swiatek.benford.infrastructure;
 import com.swiatek.benford.graph.Graph;
 import com.swiatek.benford.graph.GraphFacade;
 import lombok.AllArgsConstructor;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
@@ -16,12 +14,6 @@ import java.util.UUID;
 public class GraphController {
 
     GraphFacade graphFacade;
-
-    @GetMapping(value = "/all", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    @ResponseBody
-    public Flux<Graph> getGraphs() {
-        return graphFacade.getAllGraphs();
-    }
 
     @GetMapping("/{uuid}")
     @ResponseBody
